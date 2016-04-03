@@ -30,6 +30,10 @@ module ETL #:nodoc:
         
         # Get the connection to use during migration
         def connection
+          if @initialized.nil?
+            ActiveRecord::Base.establish_connection :etl_execution
+            @initialized = true
+          end
           @connection ||= ETL::Execution::Base.connection
         end
         
