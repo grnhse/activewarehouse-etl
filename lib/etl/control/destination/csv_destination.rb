@@ -102,7 +102,7 @@ module ETL #:nodoc:
       private
       # Get the open file stream
       def f
-        @f ||= FasterCSV.open(file, mode, options)
+        @f ||= CSV.open(file, mode, options)
       end
       
       def options
