@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module ETL #:nodoc:
   module Control #:nodoc:
     # ETL source. Subclasses must implement the <tt>each</tt> method.
@@ -75,7 +77,7 @@ module ETL #:nodoc:
       def local_file(sequence=nil)
         filename = timestamp.to_s
         filename += sequence.to_s if sequence
-        
+        filename << "-#{SecureRandom.hex}"
         local_dir = local_directory
         FileUtils.mkdir_p(local_dir)
         File.join(local_dir, "#{filename}.csv")
