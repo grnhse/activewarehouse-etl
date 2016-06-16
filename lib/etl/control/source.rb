@@ -60,7 +60,7 @@ module ETL #:nodoc:
       
       # Get the local base, defaults to 'source_data'
       def local_base
-        @local_base ||= 'source_data'
+        @local_base ||= "source_data/#{SecureRandom.hex}"
       end
       
       # The local directory for storing. This method must be overriden by 
