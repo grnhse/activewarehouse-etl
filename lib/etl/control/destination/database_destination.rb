@@ -8,6 +8,9 @@ module ETL #:nodoc:
       # The target connection
       attr_reader :target
       
+      # The table schema
+      attr_reader :schema
+
       # The table
       attr_reader :table
       
@@ -36,6 +39,7 @@ module ETL #:nodoc:
       def initialize(control, configuration, mapping={})
         super
         @target = configuration[:target]
+        @schema = configuration[:schema]
         @table = configuration[:table]
         @truncate = configuration[:truncate] ||= false
         @unique = configuration[:unique] ? configuration[:unique] + [scd_effective_date_field] : configuration[:unique]
@@ -50,27 +54,25 @@ module ETL #:nodoc:
       # Flush the currently buffered data
       def flush
         conn.transaction do
-          buffer.flatten.each do |row|
-            # check to see if this row's compound key constraint already exists
-            # note that the compound key constraint may not utilize virtual fields
-            next unless row_allowed?(row)
+          cols = order.map { |name| conn.quote_column_name(name) }
+          values = []
+          q = "INSERT INTO #{conn.quote_table_name(schema)}.#{conn.quote_table_name(table_name)} (#{cols.join(',')}) VALUES "
 
+          buffer.flatten.select { |row| row_allowed?(row) }.each do |row|
             # add any virtual fields
             add_virtuals!(row)
-            
-            names = []
-            values = []
-            order.each do |name|
-              names << conn.quote_column_name(name)
-              values << conn.quote(row[name])
-            end
-            q = "INSERT INTO #{conn.quote_table_name(table_name)} (#{names.join(',')}) VALUES (#{values.join(',')})"
-            ETL::Engine.logger.debug("Executing insert: #{q}")
-            conn.insert(q, "Insert row #{current_row}")
-            @current_row += 1
+
+            # construct an array of values for the row in the order specified by `order`
+            values << order.map { |name| row[name].nil? ? 'NULL' : conn.quote(row[name]) }
           end
-          buffer.clear
+
+          q << values.map { |value| "(#{value.join(',')})" }.join(',')
+
+          ETL::Engine.logger.debug("Executing insert: #{q}")
+          conn.insert(q)
         end
+
+        buffer.clear
       end
       
       # Close the connection
