@@ -66,10 +66,12 @@ module ETL #:nodoc:
             values << order.map { |name| row[name].nil? ? 'NULL' : conn.quote(row[name]) }
           end
 
-          q << values.map { |value| "(#{value.join(',')})" }.join(',')
+          if values.any?
+            q << values.map { |value| "(#{value.join(',')})" }.join(',')
 
-          ETL::Engine.logger.debug("Executing insert: #{q}")
-          conn.insert(q)
+            ETL::Engine.logger.debug("Executing insert: #{q}")
+            conn.insert(q)
+          end
         end
 
         buffer.clear
