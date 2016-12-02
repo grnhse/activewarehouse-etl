@@ -85,6 +85,8 @@ module ETL #:nodoc:
           values = order.collect do |name|
             value = row[name]
             case value
+            when nil
+              nil
             when Date, Time, DateTime
               value.to_s(:db)
             else
