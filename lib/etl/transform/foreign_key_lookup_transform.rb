@@ -44,7 +44,6 @@ module ETL #:nodoc:
           raise ResolverError, "Resolver does not appear to respond to resolve method" unless resolver.respond_to?(:resolve)
           fk = resolver.resolve(value)
           fk ||= @default
-          raise ResolverError, "Unable to resolve #{value} to foreign key for #{name} in row #{ETL::Engine.rows_read}. You may want to specify a :default value." unless fk
           @collection[value] = fk
         end
         fk
