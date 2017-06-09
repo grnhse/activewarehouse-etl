@@ -209,6 +209,16 @@ module ETL #:nodoc:
         return @query_rows if @query_rows
         if (configuration[:mysqlstream] == true)
           MySqlStreamer.new(query,@target,connection)
+        elsif (configuration[:pgstream] == true)
+          conn = connection.raw_connection
+          Enumerator.new do |y|
+            conn.send_query(query)
+            conn.set_single_row_mode
+
+            result = conn.get_result
+            result.check
+            result.stream_each { |row| y << row }
+          end
         else
           connection.select_all(query)
         end
