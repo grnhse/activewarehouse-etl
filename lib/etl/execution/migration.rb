@@ -7,15 +7,16 @@ module ETL #:nodoc:
         protected
         # Get the schema info table name
         def schema_info_table_name
-          ActiveRecord::Migrator.schema_migrations_table_name
+          ActiveRecord::SchemaMigration.table_name
         end
         alias :schema_migrations_table_name :schema_info_table_name
         
         public
         # Execute the migrations
         def migrate
-          connection.initialize_schema_migrations_table
-          last_migration.upto(target - 1) do |i| 
+          ActiveRecord::Base.establish_connection :etl_execution
+          ActiveRecord::SchemaMigration.create_table
+          last_migration.upto(target - 1) do |i|
             __send__("migration_#{i+1}".to_sym)
             connection.assume_migrated_upto_version(i+1)
           end
