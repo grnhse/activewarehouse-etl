@@ -17,8 +17,9 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = ">= 1.3.6"
 
   s.add_runtime_dependency('rake',                '>= 0.8.3')
-  s.add_runtime_dependency('activesupport',       '5.2.6')
-  s.add_runtime_dependency('activerecord',        '5.2.6')
+  s.add_runtime_dependency('activesupport',       '>= 3.0.0')
+  s.add_runtime_dependency('activerecord',        '>= 3.0.0')
+  s.add_runtime_dependency('adapter_extensions',  '>= 0.9.5.rc1')
 
   s.add_development_dependency('shoulda', '~>2.11.3')
   s.add_development_dependency('flexmock', '~>0.9.0')
